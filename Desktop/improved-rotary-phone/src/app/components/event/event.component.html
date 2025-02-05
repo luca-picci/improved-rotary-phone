@@ -1,16 +1,36 @@
-<div class="event-list-container">
-  <div class="search-container">
-    <input 
-      type="text" 
-      [(ngModel)]="searchTerm" 
-      (input)="onSearch()" 
-      placeholder="Cerca evento o località">
+<div>
+  <h2>Gestione Eventi</h2>
+  <button (click)="isEditing = true; selectedEvent = { id: 0, title: '', description: '', date: '', venueId: undefined }">
+    Crea Nuovo Evento
+  </button>
+
+  <!-- Form per creazione/modifica -->
+  <div *ngIf="isEditing">
+    <app-event-form
+      [event]="selectedEvent || { id: 0, title: '', description: '', date: '', venueId: undefined }"
+      [venues]="venues"
+      (saveEvent)="onSave($event)"
+    ></app-event-form>
+    <button (click)="isEditing = false">Annulla</button>
   </div>
 
-  <div class="event-card" *ngFor="let event of filteredEvents">
-    <h3>{{ event.title }}</h3>
-    <p>{{ event.description }}</p> <!-- La proprietà description dovrebbe ora funzionare -->
-    <p><strong>Data:</strong> {{ event.date | date: 'short' }}</p>
-    <p><strong>Luogo:</strong> {{ event.venue.name }}</p>
+  <!-- Barra di ricerca -->
+  <div>
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      placeholder="Cerca per titolo o località"
+      (input)="onSearch()"
+    />
+  </div>
+
+  <!-- Lista degli eventi -->
+  <div *ngFor="let event of filteredEvents">
+    <h2>{{ event.title }}</h2>
+    <p>{{ event.description }}</p>
+    <p>Data: {{ event.date | date:'fullDate' }}</p>
+    <p>Luogo: {{ event.venue?.name }} ({{ event.venue?.address }})</p>
+    <button (click)="onEdit(event)">Modifica</button>
+    <button (click)="onDelete(event.id)">Elimina</button>
   </div>
 </div>

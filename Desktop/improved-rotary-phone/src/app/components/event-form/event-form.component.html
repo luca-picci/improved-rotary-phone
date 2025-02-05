@@ -1,0 +1,27 @@
+<form (ngSubmit)="onSubmit()">
+  <div>
+    <label for="title">Titolo:</label>
+    <input id="title" [(ngModel)]="event.title" name="title" required />
+  </div>
+  <div>
+    <label for="description">Descrizione:</label>
+    <textarea id="description" [(ngModel)]="event.description" name="description" required></textarea>
+  </div>
+  <div>
+    <label for="date">Data:</label>
+    <input id="date" type="datetime-local" [(ngModel)]="event.date" name="date" required />
+  </div>
+  <div>
+    <label for="venueId">Località:</label>
+    <select id="venueId" [(ngModel)]="event.venueId" name="venueId" required>
+      <option [ngValue]="null">Seleziona una località</option>
+      <option *ngFor="let venue of venues" [ngValue]="venue.id">
+        {{ venue.name }}
+      </option>
+    </select>
+  </div>
+  <button type="submit" [disabled]="loadingVenue">
+    <span *ngIf="loadingVenue" class="spinner-border spinner-border-sm mr-2" role="status"></span>
+    Salva
+  </button>
+</form>
