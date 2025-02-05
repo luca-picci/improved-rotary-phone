@@ -1,0 +1,43 @@
+<div>
+  <h2>Gestione Eventi</h2>
+
+  <button (click)="isEditing = true; selectedEvent = null">
+    Crea Nuovo Evento
+  </button>
+
+  <div *ngIf="isEditing">
+    <app-event-form
+      [event]="selectedEvent"
+      [venues]="venues"
+      (saveEvent)="onSave($event)"
+      (cancel)="isEditing = false; selectedEvent = null"
+    ></app-event-form>
+  </div>
+
+  <div>
+    <input type="text" [(ngModel)]="searchTerm" placeholder="Cerca per titolo o località">
+    <select [(ngModel)]="selectedType" (change)="onSearch()">
+      <option value="">Tutte le tipologie</option>
+      <option *ngFor="let type of eventTypes" [value]="type">{{ type }}</option>
+    </select>
+    <button (click)="onSearch()">Cerca</button>
+  </div>
+
+  <div *ngIf="filteredEvents.length === 0 && !loading">
+    <p>Nessun evento trovato.</p>
+  </div>
+  <div *ngIf="loading">
+    <p>Caricamento eventi...</p>
+  </div>
+
+  <div *ngFor="let event of filteredEvents">
+    <h2>{{ event.title }}</h2>
+    <p>{{ event.description }}</p>
+    <p>Data: {{ event.date | date:'fullDate' }}</p>
+    <p>Luogo: {{ event.venue?.name }} ({{ event.venue?.address }})</p>
+    <p>Posti disponibili: {{ event.capacity - event.bookedSeats }}</p>
+    <p>Tipologia: {{ event.type }}</p>
+    <button (click)="onEdit(event)">Modifica</button>
+    <button (click)="onDelete(event.id)">Elimina</button>
+  </div>
+</div>
