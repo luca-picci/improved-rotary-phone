@@ -64,7 +64,7 @@ export class EventService {
       title: event.title,
       description: event.description,
       date: event.date,
-      venue: event.venue && event.venue.id ? { id: event.venue.id } : null,
+      venueId: event.venueId ?? event.venue?.id ?? null,
       type: event.type,
       capacity: event.capacity,
       bookedSeats: event.bookedSeats
@@ -85,11 +85,11 @@ export class EventService {
     const token = this.storageService.getToken();
     const headers = new HttpHeaders({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` });
 
-    const eventData = { // Dati da inviare al backend
+    const eventData = {
       title: event.title,
       description: event.description,
       date: event.date,
-      venue: event.venue && event.venue.id ? { id: event.venue.id } : null,
+      venueId: event.venueId ?? event.venue?.id ?? null, // 🛠️ Usa venueId
       type: event.type,
       capacity: event.capacity,
       bookedSeats: event.bookedSeats
@@ -100,6 +100,7 @@ export class EventService {
         catchError(this.handleError)
       );
   }
+
 
   /**
    * Elimina un evento.

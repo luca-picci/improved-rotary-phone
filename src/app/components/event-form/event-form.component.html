@@ -1,29 +1,18 @@
-<form *ngIf="eventForm" (ngSubmit)="onSubmit()">
-  <div>
-    <label for="title">Titolo:</label>
-    <input id="title" [(ngModel)]="eventForm.title" name="title" required />
-  </div>
-  <div>
-    <label for="description">Descrizione:</label>
-    <textarea id="description" [(ngModel)]="eventForm.description" name="description" required></textarea>
-  </div>
-  <div>
-    <label for="date">Data:</label>
-    <input id="date" type="datetime-local" [(ngModel)]="eventForm.date" name="date" required />
-  </div>
-  <div>
-    <label for="venueId">Località:</label>
-    <select id="venueId" [(ngModel)]="eventForm.venueId" name="venueId" required>
-      <option [ngValue]="null">Seleziona una località</option>
-      <option *ngFor="let venue of venues" [ngValue]="venue.id">
+<form (ngSubmit)="onSubmit()">
+  <mat-form-field>
+    <mat-label>Venue</mat-label>
+    <input type="text" matInput [formControl]="venueSearchControl" [matAutocomplete]="auto">
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onVenueSelect($event)" [displayWith]="displayVenue">
+      <mat-option *ngFor="let venue of filteredVenues" [value]="venue">
         {{ venue.name }}
-      </option>
-    </select>
-  </div>
-  <button type="submit" [disabled]="loadingVenue">
-    <span *ngIf="loadingVenue" class="spinner-border spinner-border-sm mr-2" role="status"></span>
-    Salva
-  </button>
-</form>
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
 
-<p *ngIf="!eventForm">Crea un nuovo evento</p>
+  <mat-option *ngIf="filteredVenues.length === 0 && venueSearchControl.value">
+    <span (click)="addNewVenue()">+ Aggiungi {{ venueSearchControl.value ? venueSearchControl.value.toString().trim() : '' }}</span>
+  </mat-option>
+
+  <button type="submit" [disabled]="loadingVenue">Salva</button>
+  <button type="button" (click)="cancel.emit()">Annulla</button>
+</form>

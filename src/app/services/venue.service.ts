@@ -30,6 +30,18 @@ export class VenueService {
     );
   }
 
+  createVenue(venue: Venue): Observable<Venue> {
+    const token = this.storageService.getToken();
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    })
+
+    return this.http.post<Venue>(this.apiURL, venue, { headers }).pipe(
+      catchError(this.handleError)
+    )
+  }
+
   private handleError(error: HttpErrorResponse) {
     console.error('Venue Service Error:', error);
     let errorMessage = 'An error occurred while fetching venues.';

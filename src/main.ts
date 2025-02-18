@@ -6,6 +6,7 @@ import { provideNgxWebstorage, withNgxWebstorageConfig, withLocalStorage, withSe
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JwtInterceptor } from './app/interceptors/jwtinterceptor';
 import { routes } from './app/app.routes';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 const storageConfig = {
   separator: ':',
@@ -21,6 +22,6 @@ bootstrapApplication(AppComponent, {
       withNgxWebstorageConfig(storageConfig),
       withLocalStorage(),
       withSessionStorage()
-    ),
+    ), provideAnimationsAsync(),
   ],
 }).catch((err) => console.error(err));

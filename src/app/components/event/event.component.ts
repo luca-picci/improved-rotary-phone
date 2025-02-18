@@ -1,95 +1,81 @@
 import { Component, OnInit } from '@angular/core';
 import { EventService } from '../../services/event.service';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Event } from '../../models/event.model';
-import { EventFormComponent } from '../event-form/event-form.component';
-import { Venue } from '../../models/venue.model';
 import { VenueService } from '../../services/venue.service';
+import { Event } from '../../models/event.model';
+import { Venue } from '../../models/venue.model';
+import { EventFormComponent } from '../event-form/event-form.component';
+import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { BookingService} from '../../services/booking.service';
 
 @Component({
   selector: 'app-event',
-  standalone: true,
-  imports: [CommonModule, FormsModule, EventFormComponent],
+  imports: [CommonModule, EventFormComponent, FormsModule],
   templateUrl: './event.component.html',
   styleUrls: ['./event.component.css']
 })
 export class EventComponent implements OnInit {
   events: Event[] = [];
-  filteredEvents: Event[] = [];
-  searchTerm: string = '';
-  selectedEvent: Event | null = null; // Importante: può essere null
-  isEditing = false;
   venues: Venue[] = [];
-  selectedType: string = '';
+  filteredEvents: Event[] = [];
   eventTypes: string[] = ['Concerto', 'Teatro', 'Workshop', 'Convegno'];
+  searchTerm: string = '';
+  selectedType: string = '';
+  selectedEvent: Event | null = null;
+  isEditing = false;
   loading: boolean = false;
+  message: string = '';
 
-  constructor(private eventService: EventService, private venueService: VenueService) { }
+  constructor(private eventService: EventService, private venueService: VenueService, private bookingService: BookingService) { }
 
   ngOnInit(): void {
     this.loadVenues();
+    this.loadEvents();
   }
 
-  loadEvents(type: string = ''): void {
+  loadVenues(): void {
+    this.venueService.getVenues().subscribe({
+      next: (venues) => this.venues = venues,
+      error: (error) => console.error("Errore nel caricamento delle venues", error)
+    });
+  }
+
+  loadEvents(): void {
     this.loading = true;
-    this.eventService.getEventsWithVenues(type).subscribe({
+    this.eventService.getEventsWithVenues().subscribe({
       next: (data) => {
         this.events = data;
-        this.filteredEvents = data;
+        this.filteredEvents = data; // Inizializza con tutti gli eventi
         this.loading = false;
       },
       error: (error) => {
-        console.error("Error loading events:", error);
+        console.error("Errore nel caricamento degli eventi:", error);
         this.loading = false;
       }
     });
   }
 
-  loadVenues(): void {
-    this.venueService.getVenues().subscribe(venues => {
-      this.venues = venues;
-      this.loadEvents();
+  onSearch(): void {
+    this.filteredEvents = this.events.filter(event => {
+      const matchesTitle = event.title.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchesVenue = event.venue?.name.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchesType = this.selectedType ? event.type === this.selectedType : true;
+      return (matchesTitle || matchesVenue) && matchesType;
     });
   }
 
-  onSearch(): void {
-    let filtered = this.events;
-
-    if (this.searchTerm) {
-      const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(event =>
-        event.title.toLowerCase().includes(term) ||
-        (event.venue?.name?.toLowerCase().includes(term))
-      );
-    }
-
-    if (this.selectedType) {
-      filtered = filtered.filter(event => event.type === this.selectedType);
-    }
-
-    this.filteredEvents = filtered;
-  }
-
   onEdit(event: Event): void {
-    this.selectedEvent = { ...event }; // Clonazione per evitare modifiche dirette
+    this.selectedEvent = { ...event };
     this.isEditing = true;
   }
 
   onDelete(eventId: number): void {
     if (confirm('Sei sicuro di voler eliminare questo evento?')) {
-      this.eventService.deleteEvent(eventId).subscribe(() => {
-        this.loadEvents();
-      });
+      this.eventService.deleteEvent(eventId).subscribe(() => this.loadEvents());
     }
   }
 
   onSave(event: Event): void {
-    if (!event.venue || !event.venue.id) {
-      alert("Please select a venue.");
-      return;
-    }
-
     const saveObservable = event.id ?
       this.eventService.updateEvent(event) :
       this.eventService.createEvent(event);
@@ -101,9 +87,42 @@ export class EventComponent implements OnInit {
         this.selectedEvent = null;
       },
       error: (error) => {
-        console.error("Error saving event:", error);
+        console.error("Errore durante il salvataggio dell'evento", error);
         alert(error.message);
       }
     });
+  }
+
+  onBook(id: number): void {
+    this.message = '';
+
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      this.message = 'Devi essere autenticato per prenotare un evento';
+      return;
+    }
+
+    const body = {};
+    this.bookingService.bookEvent(id, body).subscribe({
+      next: (res: any) => {
+        console.log('Prenotazione effettuata:', res);
+        this.message = 'Prenotazione effettuata con successo!';
+        this.loadEvents();
+      },
+      error: (err: any) => {
+        console.error("Errore prenotazione", err);
+
+        if (err.status === 400) {
+          this.message = 'L\'evento è al completo';
+        } else if (err.status === 404) {
+          this.message = 'Evento non trovato';
+        } else if (err.status === 401) {
+          this.message = 'Sessione scaduta. Effettua di nuovo il login';
+          localStorage.removeItem('access_token');
+        } else {
+          this.message = 'Errore durante la prenotazione. Riprova più tardi.';
+        }
+      }
+    })
   }
 }
