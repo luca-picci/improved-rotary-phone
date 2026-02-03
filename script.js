@@ -12,7 +12,7 @@ const yesBtn = document.getElementById("yes");
 const noBtn = document.getElementById("no");
 
 // 14 febbraio ore 00:00 (mese = 1 perché gennaio = 0)
-const targetDate = new Date(new Date().getFullYear(), 0, 14, 0, 0, 0);
+const targetDate = new Date(new Date().getFullYear(), 1, 14, 0, 0, 0);
 
 // Aggiorna countdown
 function updateCountdown() {
@@ -86,3 +86,4 @@ setInterval(() => {
 
   setTimeout(() => heart.remove(), 10000);
 }, 500);
+
