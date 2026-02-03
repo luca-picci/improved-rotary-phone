@@ -14,7 +14,8 @@ const noBtn = document.getElementById("no");
 // 14 febbraio ore 00:00 (mese = 1 perché gennaio = 0)
 const targetDate = new Date(new Date().getFullYear(), 1, 14, 0, 0, 0);
 
-// Aggiorna countdown
+let heartsInterval; // variabile per salvare l'intervallo
+
 function updateCountdown() {
   const now = new Date();
   const diff = targetDate - now;
@@ -22,6 +23,22 @@ function updateCountdown() {
   if (diff <= 0) {
     countdownContainer.classList.add("hidden");
     questionContainer.classList.remove("hidden");
+
+    // Partono i cuori fluttuanti solo ora
+    if (!heartsInterval) {
+      // evita di creare più intervalli
+      const heartsContainer = document.querySelector(".hearts");
+      heartsInterval = setInterval(() => {
+        const heart = document.createElement("span");
+        heart.textContent = "❤️";
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.animationDuration = 5 + Math.random() * 5 + "s";
+        heartsContainer.appendChild(heart);
+
+        setTimeout(() => heart.remove(), 10000);
+      }, 500);
+    }
+
     return;
   }
 
@@ -74,32 +91,3 @@ yesBtn.addEventListener("click", () => {
     setTimeout(() => heart.remove(), 1100);
   }
 });
-
-if (diff <= 0) {
-  countdownContainer.classList.add("hidden");
-  questionContainer.classList.remove("hidden");
-
-  // Cuori esplosivi quando il countdown finisce
-  for (let i = 0; i < 30; i++) {
-    const heart = document.createElement("span");
-    heart.textContent = "❤️";
-    heart.style.position = "fixed";
-    heart.style.left = Math.random() * window.innerWidth + "px";
-    heart.style.top = Math.random() * window.innerHeight + "px";
-    heart.style.fontSize = `${10 + Math.random() * 30}px`;
-    heart.style.opacity = 0.9;
-    heart.style.transition = "all 1s ease-out";
-    document.body.appendChild(heart);
-
-    setTimeout(() => {
-      heart.style.transform = `translate(${Math.random() * 200 - 100}px, ${Math.random() * -200}px) scale(1.5)`;
-      heart.style.opacity = 0;
-    }, 10);
-
-    setTimeout(() => heart.remove(), 1100);
-  }
-
-  return;
-}
-
-
