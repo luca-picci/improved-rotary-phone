@@ -1,3 +1,4 @@
+const mainContainer = document.getElementById("main-container");
 const countdownContainer = document.getElementById("countdown-container");
 const questionContainer = document.getElementById("question-container");
 const yesContainer = document.getElementById("yes-container");
@@ -10,7 +11,7 @@ const secondsEl = document.getElementById("seconds");
 const yesBtn = document.getElementById("yes");
 const noBtn = document.getElementById("no");
 
-// 14 febbraio ore 00:00 (timezone locale)
+// 14 febbraio ore 00:00 (mese = 1 perché gennaio = 0)
 const targetDate = new Date(new Date().getFullYear(), 0, 14, 0, 0, 0);
 
 // Aggiorna countdown
@@ -42,15 +43,15 @@ function moveNo() {
   noBtn.style.top = `${y}px`;
 }
 
-noBtn.addEventListener("mouseover", moveNo); // desktop
-noBtn.addEventListener("touchstart", moveNo); // mobile
+noBtn.addEventListener("mouseover", moveNo);
+noBtn.addEventListener("touchstart", moveNo);
 
-// SÌ con vibrazione e cuori esplosivi
+// SÌ con vibrazione, cuori esplosivi e messaggio "Ti amo ❤️"
 yesBtn.addEventListener("click", () => {
-  if (navigator.vibrate) {
-    navigator.vibrate([300, 150, 300, 150, 500]);
-  }
-  questionContainer.classList.add("hidden");
+  if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 500]);
+
+  // Nascondi tutto tranne la parte “yes-container”
+  mainContainer.classList.add("hidden");
   yesContainer.classList.remove("hidden");
 
   // Cuori esplosivi
